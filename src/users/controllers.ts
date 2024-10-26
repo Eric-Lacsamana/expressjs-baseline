@@ -1,23 +1,15 @@
 import { Request, Response } from "express";
-import { User } from '../models/User';
-import { AppDataSource } from "../database";
+// import user model or entity
+
 
 export const getUsers = async (req: Request, res: Response) => {
-    const userRepository = AppDataSource.getRepository(User);
 
-    const users = await userRepository.find();
+    res.send([]);
+};
 
-    res.send(users);
-}
-
-export const createUser = async (req: Request, res: Response) => {
-    const userRepository = AppDataSource.getRepository(User);
-    const { username, password }  = req.body;
+export const getUser = async (req: Request, res: Response) => {
+    const { id }  = req.query;
    
-    const user = await userRepository.create({
-        username,
-        password,
-    })
-    
-    res.send(user);
+
+    res.send({});
 }
