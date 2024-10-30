@@ -2,7 +2,6 @@ import jwt, { Secret, JwtPayload, JsonWebTokenError, TokenExpiredError } from 'j
 import { Request, Response, NextFunction } from 'express';
 
 
-
 // Extend Express Request to include an optional token property for decoded payload
 export interface CustomRequest extends Request {
   token?: string | JwtPayload;
@@ -12,7 +11,7 @@ export const authenticateJWT = (req: CustomRequest, res: Response, next: NextFun
   try {
     // Extract the token from the Authorization header
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    console.log('token', token);
+
     if (!token) {
       // Respond with 401 if no token is provided
       res.status(401).send({ message: 'Unauthorized: No token provided' });
@@ -21,7 +20,7 @@ export const authenticateJWT = (req: CustomRequest, res: Response, next: NextFun
 
     // Verify the token and decode the payload
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload; // Cast to JwtPayload for type safety
-    console.log('decoded', decoded);
+
     req.token = decoded; // Store decoded payload in request
 
     next(); // Proceed to the next middleware

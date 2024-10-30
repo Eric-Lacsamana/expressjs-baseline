@@ -1,10 +1,9 @@
-export interface CreateUser {
+export interface CreateUserRequest {
     username: string;
     password: string;
 }
 
-
-export interface RetrieveUser {
+export interface GetUserResponse {
     id: string | number;
     username: string;
     password?: string;

@@ -1,10 +1,10 @@
 import * as express from 'express';
-import { RetrieveUser } from '.';
+import { GetUserResponse } from '.';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: RetrieveUser; // Define the user property with the expected shape
+      user?: GetUserResponse; // Define the user property with the expected shape
     }
   }
 }

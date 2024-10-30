@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
-import { CreateUser, RetrieveUser } from './types';
+import { CreateUserRequest, GetUserResponse } from './types';
 
 const userDatabase: Map<string, { id: string; username: string; password: string }> = new Map();
 
-export const createUser = async ({username, password}: CreateUser): Promise<RetrieveUser> => {
+export const createUser = async ({username, password}: CreateUserRequest): Promise<GetUserResponse> => {
  const id = uuidv4()
   userDatabase.set(username, { id, username, password });
 
@@ -20,7 +20,6 @@ export const findUserById = (id: string) => {
     }
     return null; // Return null if not found
 };
-
 
 export const findUserByUsername = (username: string) => {
   return userDatabase.get(username);

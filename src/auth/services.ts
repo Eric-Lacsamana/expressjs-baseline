@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import { RetrieveUser } from '../types';
+import { GetUserResponse } from '../types';
 
 
-export const generateToken = ({ id, username }: RetrieveUser) => {
+export const generateToken = ({ id, username }: GetUserResponse) => {
     return jwt.sign({ id, username }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
 };
