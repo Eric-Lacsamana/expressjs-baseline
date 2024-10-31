@@ -3,34 +3,118 @@ import { CreateUserRequest, GetUserResponse } from './types';
 
 const userDatabase: Map<string, { id: string; username: string; password: string }> = new Map();
 
-export const createUser = async ({username, password}: CreateUserRequest): Promise<GetUserResponse> => {
- const id = uuidv4()
-  userDatabase.set(username, { id, username, password });
+interface User {
+	id: string;
+	username: string;
+	password: string;
+}
 
-  return { username, id }; // Return user data without password
-};
+interface WhereClause {
+	id?: string;
+	username?: string;
+	name?: string;
+	password?: string;
+	[key: string]: any; // Allow additional properties
+}
+  
+interface FindOptions {
+	sort?: { [key: string]: 'asc' | 'desc' };
+	limit?: number;
+}
+  
+interface FindParams {
+	where?: WhereClause;
+	options?: FindOptions;
+}
+  
+interface FindOptions {
+	sort?: { [key: string]: 'asc' | 'desc' }; // Sorting options
+	limit?: number; // Limit for the number of results
+}
 
-export const findUserById = (id: string) => {
-    // Find user by iterating through the map
-    for (const user of userDatabase.values()) {
-        console.log('user', user);
-      if (user.id === id) {
-        return user;
-      }
-    }
-    return null; // Return null if not found
-};
+const userRepository = {
+    create: async ({username, password}: CreateUserRequest): Promise<GetUserResponse> => {
+    const id = uuidv4()
+     userDatabase.set(username, { id, username, password });
+   
+     return { username, id };
+   	},
+	find: async (params: FindParams = {}): Promise<User[]> => {
+		const { where = {}, options = {} } = params;
+	  
+		// If 'where' is empty, return all users
+		if (Object.keys(where).length === 0) {
+		  return Array.from(userDatabase.values());
+		}
+	  
+		const results: User[] = [];
+	  
+		// Iterate through the userDatabase
+		for (const user of userDatabase.values()) {
+		  let matches = true;
+	  
+		  // Check each field in the where object
+		  for (const [key, value] of Object.entries(where)) {
+			if (user[key as keyof User] !== value) {
+			  matches = false;
+			  break; // Exit early if one doesn't match
+			}
+		  }
+	  
+		  // If all fields match, add user to results
+		  if (matches) {
+			results.push(user);
+		  }
+		}
 
-export const findUserByUsername = (username: string) => {
-  return userDatabase.get(username);
-};
+		// Return empty array if no matches found
+		if (results.length === 0) {
+			return results; // Returns an empty array
+		}
+	  
+		// Handle sorting if options.sort is defined and is an object
+		if (options.sort && typeof options.sort === 'object') {
+		  results.sort((a, b) => {
+			for (const key in options.sort) {
+			  const order = options.sort[key];
+			  if (order === 'asc' || order === 'desc') {
+				const aValue = a[key as keyof User];
+				const bValue = b[key as keyof User];
+	  
+				if (aValue < bValue) return order === 'asc' ? -1 : 1;
+				if (aValue > bValue) return order === 'asc' ? 1 : -1;
+			  }
+			}
+			return 0; // If all compared fields are equal
+		  });
+		}
+	  
+		// Limit the number of results if specified
+		if (options.limit) {
+		  return results.slice(0, options.limit); // Return only up to 'limit' results
+		}
+	  
+		return results; // Return all matching results
+	},
+	update: async (id: string, updates: Partial<User>): Promise<User | null> => {
+		// Check if the user exists in the database
+		const user = userDatabase.get(id);
+		if (!user) {
+		  return null; // Return null if user not found
+		}
+	  
+		// Update user properties with provided updates
+		Object.assign(user, updates);
+	  
+		// Optionally, you could return a new copy of the updated user
+		return user; // Return the updated user
+	},
+   	delete: async (id: string): Promise<boolean> => {
+		// Check if the user exists in the database
+		const deleted = userDatabase.delete(id);
+		return deleted; // Return true if the user was deleted, false if not found
+	},
+}
 
-export const userExists = (username: string) => {
-  return userDatabase.has(username);
-};
-
-export const findAllUsers = () => {
-    // Return an array of users, excluding the password
-    return Array.from(userDatabase.values()).map(({ id, username }) => ({ id, username }));
-};
+export default userRepository;
   

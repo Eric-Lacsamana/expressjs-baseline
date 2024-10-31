@@ -1,8 +1,7 @@
 import express, { Application } from 'express'; // Import Express and Application types
 import { errorHandler } from './middleware/error-middleware';
-import userRoutes from './users/routes'; // Import user routes from the routes module
-import authRoutes from './auth/routes';
-
+import authRoutes from './modules/auth/routes';  // Import auth routes from the routes module
+import userRoutes from './modules/users/routes'; // Import user routes from the routes module
 
 const app: Application = express(); // Create an Express application instance
 
@@ -13,7 +12,6 @@ app.use('/auth', authRoutes);
 
 // Register user-related routes under the '/users' path
 app.use('/users', userRoutes);
-
 
 // Centralized error handling middleware
 app.use(errorHandler);
