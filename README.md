@@ -116,7 +116,7 @@ npm run lint
 - **@types/express**: Type definitions for Express.
 - **@types/jsonwebtoken**: Type definitions for jsonwebtoken.
 - **@types/node**: Type definitions for Node.js.
-- **nodemon**: For automatically restarting the server during development.
+- **ts-node-dev**: For automatically restarting the server during development.
 - **ts-node**: TypeScript execution engine for Node.js.
 - **typescript**: TypeScript language support.
 
