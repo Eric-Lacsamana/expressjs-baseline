@@ -54,7 +54,8 @@ This is a basic Express.js application template designed to provide a foundation
     {
       "username": "string",
       "password": "string"
-    }```
+    }
+    ```
   - Response:
     - Success: 201 Created
     - Conflict: 409 Conflict (if username already exists)
