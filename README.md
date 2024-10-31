@@ -67,7 +67,8 @@ This is a basic Express.js application template designed to provide a foundation
     {
       "username": "string",
       "password": "string"
-    }```
+    }
+    ```
   - Response:
     - Success: 200 OK with JWT token
     - Unauthorized: 401 Unauthorized (if invalid credentials)
@@ -80,7 +81,8 @@ Errors are handled centrally. In case of errors, the response format will be:
   "status": "error",
   "statusCode": <number>,
   "message": "Error message"
-}```
+}
+```
 
 ## Development
 
