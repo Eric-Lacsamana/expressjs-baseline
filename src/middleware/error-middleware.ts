@@ -8,7 +8,8 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     
     // Respond with the error message
     res.status(statusCode).json({
-        success: false,
+        // success: false,
+        statusCode,
         message: err.message || "Internal Server Error",
     });
 };

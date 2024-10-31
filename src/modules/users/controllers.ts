@@ -1,9 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import userService from "./service";
+import { NotFoundError } from "../../errors/NotFoundError";
 
 // Controller to handle fetching all users
 const userController = {
-    getUsers:async (req: Request, res: Response) => {
+    getUsers:async (req: Request, res: Response, next: NextFunction) => {
         try {
             // Fetch all users from the user service
             const users = await userService.findAllUsers();
@@ -11,35 +12,24 @@ const userController = {
             // Respond with a 200 status and the user data
             res.status(200).json({ success: true, data: users });
         } catch (error) {
-            // Log the error for debugging
-            console.error(error);
-            
-            // Respond with a 500 status in case of a server error
-            res.status(500).json({ success: false, message: "Internal Server Error" });
+            next(error);
         }
     },
     // Controller to handle fetching a specific user by ID
-    getUser: async (req: Request, res: Response) => {
+    getUser: async (req: Request, res: Response, next: NextFunction) => {
         const { id } = req.params; // Extract user ID from request parameters
-    
         try {
             // Fetch user by ID from the user service
-            const userEntry = await userService.findUserById(id);
-    
-            // Check if the user was found; if not, respond with a 404 status
-            if (!userEntry) {
-                res.status(404).json({ success: false, message: "User not found" });
-                return;
+            const existingUser = await userService.findUserById(id);
+
+            if (!existingUser) {
+                throw new NotFoundError('User not found')
             }
     
             // Respond with a 200 status and the user data
-            res.status(200).json({ success: true, data: userEntry });
+            res.status(200).json({ success: true, data: existingUser });
         } catch (error) {
-            // Log the error for debugging
-            console.error(error);
-            
-            // Respond with a 500 status in case of a server error
-            res.status(500).json({ success: false, message: "Internal Server Error" });
+            next(error);
         }
     },
 }

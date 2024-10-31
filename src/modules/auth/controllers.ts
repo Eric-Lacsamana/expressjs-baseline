@@ -1,28 +1,30 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import authService from './services';
 import userService from '../users/service';
 import userRepository from '../../userRepository';
+import { BadRequestError } from '../../errors/BadRequestError';
+import { UnauthorizedError } from '../../errors/UnauthorizedError';
+import { NotFoundError } from '../../errors/NotFoundError';
+import { ConflictError } from '../../errors/ConflictError';
 
 
 const authController = {
     // handler for user registration
-    register: async (req: Request, res: Response) => {
+    register: async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { username, password } = req.body;
     
             // Validation: Check for required fields
             if (!username || !password) {
-                res.status(400).json({ message: 'Username and password are required' });
-                return;
+                throw new BadRequestError('Username and password are required');
             }
     
             // Check if the username already exists
             const existingUser = await userService.findUserByUsername(username);
-        
+
             if (existingUser) {
-                res.status(400).json({ message: 'Username already exists' });
-                return;
+                throw new ConflictError('Username already in used');
             }
     
             // Create the new user using the user service
@@ -39,12 +41,11 @@ const authController = {
             });
     
         } catch (err) {
-            console.error(err); // Log the error for debugging
-            res.status(500).json({ message: 'Error during registration' });
+           next(err);
         }
     },
     // Handler for user login
-     login: async (req: Request, res: Response) => {
+     login: async (req: Request, res: Response, next: NextFunction) => {
         const { username, password } = req.body;
         try {
             // Find user by username
@@ -52,8 +53,7 @@ const authController = {
     
             // Check if the user exists
             if (!user) {
-                res.status(404).json({ message: 'Username or password is incorrect' });
-                return;
+                throw new NotFoundError('Username or password is incorrect');
             }
     
             // Compare provided password with the hashed password
@@ -61,8 +61,7 @@ const authController = {
     
             // If the password does not match
             if (!match) {
-                res.status(401).json({ message: 'Username or password is incorrect' });
-                return;
+                throw new UnauthorizedError('Username or password is incorrect');
             }
 
             // Generate JWT token for the authenticated user
@@ -75,8 +74,7 @@ const authController = {
             });
             
         } catch (err) {
-            console.error(err); // Log the error for debugging
-            res.status(500).json({ message: 'Error during login' });
+           next(err);
         }
     }
 }

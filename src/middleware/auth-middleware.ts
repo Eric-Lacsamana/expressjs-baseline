@@ -1,44 +1,45 @@
-import jwt, { Secret, JwtPayload, JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import jwt, { JwtPayload, TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import { UnauthorizedError } from '../errors/UnauthorizedError';
 
 
-// Extend Express Request to include an optional token property for decoded payload
-export interface CustomRequest extends Request {
-  token?: string | JwtPayload;
+// Extend the Request interface to include a token property
+interface CustomRequest extends Request {
+  token?: JwtPayload; // Optional property to hold the decoded JWT payload
 }
 
+// Middleware function to authenticate JWT
 export const authenticateJWT = (req: CustomRequest, res: Response, next: NextFunction): void => {
-  try {
-    // Extract the token from the Authorization header
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+  // Extract the token from the Authorization header
+  const token = req.header('Authorization')?.replace('Bearer ', '');
 
-    if (!token) {
-      // Respond with 401 if no token is provided
-      res.status(401).send({ message: 'Unauthorized: No token provided' });
-      return;
-    }
-
-    // Verify the token and decode the payload
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload; // Cast to JwtPayload for type safety
-
-    req.token = decoded; // Store decoded payload in request
-
-    next(); // Proceed to the next middleware
-  } catch (err) {
-    if (err instanceof TokenExpiredError) {
-      // Respond with 401 if the token has expired
-      res.status(401).send({ message: 'Unauthorized: Token has expired' });
-      return;
-    }
-    
-    if (err instanceof JsonWebTokenError) {
-      // Respond with 401 for other JWT errors (invalid signature, etc.)
-      res.status(401).send({ message: `Unauthorized: ${err.message}` });
-      return;
-    }
-    
-    // Log general errors for debugging and respond with 500
-    console.error('Authentication error:', err);
-    res.status(500).send({ message: 'Internal server error' });
+  // Check if the token is not provided
+  if (!token) {
+    // Respond with 401 Unauthorized if no token is found
+    return next(new UnauthorizedError('Unauthorized: No token provided'));
   }
+
+  // Verify the token using the secret from environment variables
+  jwt.verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
+    // Check for verification errors
+    if (err) {
+      // Handle specific JWT errors
+      if (err instanceof TokenExpiredError) {
+        // Token has expired
+        return next(new UnauthorizedError('Unauthorized: Token has expired'));
+      } else if (err instanceof JsonWebTokenError) {
+        // Token is invalid (malformed or incorrect)
+        return next(new UnauthorizedError('Unauthorized: Invalid or malformed token'));
+      } else {
+        // For any other errors, pass it to the next error handler
+        return next(err);
+      }
+    }
+
+    // If the token is valid, store the decoded payload in the request
+    req.token = decoded as JwtPayload; // Cast to JwtPayload for type safety
+
+    // Call next middleware in the stack
+    next();
+  });
 };

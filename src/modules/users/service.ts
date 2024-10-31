@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import { CreateUserRequest } from '../../types';
 import userRepository from '../../userRepository'; // This should refer to the mock user repository
+import { ConflictError } from '../../errors/ConflictError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 const userService = {
 	createUser: async ({ username, password }: CreateUserRequest) => {
@@ -17,9 +19,10 @@ const userService = {
 		// Retrieve a user by ID using the mock user repository
 		return userRepository.find({ where: { id } });
 	},
-	findUserByUsername: (username: string) => {
+	findUserByUsername: async (username: string) => {
 		// Retrieve a user by username using the mock user repository
-		return userRepository.find({ where: { username } });
+		const [user] = await userRepository.find({ where: { username } });
+		return user;
 	},
 	findAllUsers: () => {
 		// Retrieve all users using the mock user repository
