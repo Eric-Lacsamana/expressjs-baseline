@@ -13,8 +13,8 @@ const authController = {
     // handler for user registration
     register: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { username, password } = req.body;
-    
+            const { name, email, username, password } = req.body;
+
             // Validation: Check for required fields
             if (!username || !password) {
                 throw new BadRequestError('Username and password are required');
@@ -28,7 +28,7 @@ const authController = {
             }
     
             // Create the new user using the user service
-            const newUser = await userService.createUser({ username, password });
+            const newUser = await userService.createUser({ name, email, username, password });
     
             // Generate JWT token for the new user
             const token = authService.generateToken(newUser);

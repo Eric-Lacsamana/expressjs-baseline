@@ -1,20 +1,23 @@
 import { v4 as uuidv4 } from 'uuid';
 import { CreateUserRequest, GetUserResponse } from './types';
 
-const userDatabase: Map<string, { id: string; username: string; password: string }> = new Map();
-
 interface User {
 	id: string;
+	name: string;
+	email: string;
 	username: string;
 	password: string;
 }
 
+const userDatabase: Map<string, User> = new Map();
+
 interface WhereClause {
 	id?: string;
-	username?: string;
 	name?: string;
+	email?: string;
+	username?: string;
 	password?: string;
-	[key: string]: any; // Allow additional properties
+	[key: string]: any;
 }
   
 interface FindOptions {
@@ -33,11 +36,11 @@ interface FindOptions {
 }
 
 const userRepository = {
-    create: async ({username, password}: CreateUserRequest): Promise<GetUserResponse> => {
+    create: async ({ name, email, username, password }: CreateUserRequest): Promise<GetUserResponse> => {
     const id = uuidv4()
-     userDatabase.set(username, { id, username, password });
+     userDatabase.set(username, { id, name, email, username, password });
    
-     return { username, id };
+     return { name, email, username, id };
    	},
 	find: async (params: FindParams = {}): Promise<User[]> => {
 		const { where = {}, options = {} } = params;
@@ -114,6 +117,7 @@ const userRepository = {
 		const deleted = userDatabase.delete(id);
 		return deleted; // Return true if the user was deleted, false if not found
 	},
+	clear: async () => userDatabase.clear(),
 }
 
 export default userRepository;

@@ -1,16 +1,14 @@
 import bcrypt from 'bcryptjs';
 import { CreateUserRequest } from '../../types';
 import userRepository from '../../userRepository'; // This should refer to the mock user repository
-import { ConflictError } from '../../errors/ConflictError';
-import { NotFoundError } from '../../errors/NotFoundError';
 
 const userService = {
-	createUser: async ({ username, password }: CreateUserRequest) => {
+	createUser: async ({ name, email, username, password }: CreateUserRequest) => {
 		// Hash the password before saving
 		const hashedPassword = await bcrypt.hash(password, 10);
 
 		// Create a new user payload
-		const newUser = { username, password: hashedPassword };
+		const newUser = { name,  email, username, password: hashedPassword };
 
 		// Save the new user using the mock user repository
 		return userRepository.create(newUser);

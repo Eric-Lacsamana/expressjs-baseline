@@ -114,7 +114,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/types/**/*"
+    "src/types/**/*",
+    "jest.config.ts"
   ],
   "exclude": ["node_modules"]
 }

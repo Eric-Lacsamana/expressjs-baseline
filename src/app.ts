@@ -8,10 +8,10 @@ const app: Application = express(); // Create an Express application instance
 app.use(express.json()); // Middleware to parse JSON request bodies
 
 // Register auth-related routes under the '/auth' path
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
 // Register user-related routes under the '/users' path
-app.use('/users', userRoutes);
+app.use('/api/users', userRoutes);
 
 // Centralized error handling middleware
 app.use(errorHandler);
