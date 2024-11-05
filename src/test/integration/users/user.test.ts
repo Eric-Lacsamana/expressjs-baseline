@@ -1,80 +1,81 @@
 import request from 'supertest';
-import app from '../../../app'; // Your app entry point
-import userRepository from '../../../userRepository'; // Assume a repository for user operations
-import { userData } from '../../utils/auth.utils';
+import app from '../../../app';
+import { userData, login, register } from '../../utils/auth.utils';
+import { User } from '../../../types';
+import userRepository from '../../../userRepository';
 
+let token = '';  // Store the JWT token
 
 beforeAll(async () => {
     process.env.JWT_SECRET = 'your_jwt_secret';
     process.env.JWT_EXPIRES_IN = '1h';
 
     await userRepository.clear();
+
+    // Register a user and store the JWT token
+    const response = await register(userData);
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('jwt');
+    token = response.body.jwt;
 });
 
 describe('User CRUD API', () => {
-    let userId: string; // Store the user ID for update and delete tests
+    let newUser: User;
 
-    beforeEach(async () => {
-        await userRepository.clear(); // Clear mock data before each test
-    });
+    const userPayload = { 
+        name: 'Jane Doe',
+        email: 'jane@example.com',
+        username: 'janedoe',
+        password: 'Password@123'
+    };
 
+    // Create a new user
     it('should create a new user', async () => {
         const response = await request(app)
             .post('/api/users')
-            .send(userData)
-            .set('Accept', 'application/json');
+            .send(userPayload)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(201);
-        expect(response.body).toHaveProperty('id');
-        expect(response.body.name).toBe(userData.name);
-        userId = response.body.id; // Store user ID for later tests
+        expect(response.body.data).toHaveProperty('id');
+        expect(response.body.data.name).toBe(userPayload.name);
+        newUser = response.body.data;
     });
 
+    // Read a user by ID
     it('should read a user by ID', async () => {
-        // First, create a user to ensure we have one to retrieve
-        const createResponse = await request(app)
-            .post('/api/users')
-            .send(userData)
-            .set('Accept', 'application/json');
-
         const response = await request(app)
-            .get(`/api/users/${createResponse.body.id}`)
-            .set('Accept', 'application/json');
+            .get(`/api/users/${newUser.id}`)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('id', createResponse.body.id);
-        expect(response.body.name).toBe(userData.name);
+        expect(response.body.data).toHaveProperty('id', newUser.id);
+        expect(response.body.data.name).toBe(userPayload.name);
     });
 
+    // Update a user
     it('should update a user', async () => {
-        // Create a user first
-        const createResponse = await request(app)
-            .post('/api/users')
-            .send(userData)
-            .set('Accept', 'application/json');
-
-        const updatedData = { ...userData, name: 'Jane Doe' };
+        const updatedData = { ...userPayload, name: 'Jane Doe Updated' };
 
         const response = await request(app)
-            .put(`/api/users/${createResponse.body.id}`)
+            .put(`/api/users/${newUser.id}`)
             .send(updatedData)
-            .set('Accept', 'application/json');
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(200);
-        expect(response.body.name).toBe(updatedData.name);
+        expect(response.body.data.name).toBe(updatedData.name);
     });
 
+    // Delete a user
     it('should delete a user', async () => {
-        // Create a user first
-        const createResponse = await request(app)
-            .post('/api/users')
-            .send(userData)
-            .set('Accept', 'application/json');
-
         const response = await request(app)
-            .delete(`/api/users/${createResponse.body.id}`)
-            .set('Accept', 'application/json');
+            .delete(`/api/users/${newUser.id}`)
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
 
-        expect(response.status).toBe(204);
+        expect(response.status).toBe(204);  // 204 indicates successful deletion
     });
 });

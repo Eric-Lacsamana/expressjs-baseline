@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { CreateUserRequest } from '../../types';
+import { CreateUserRequest, User } from '../../types';
 import userRepository from '../../userRepository'; // This should refer to the mock user repository
 
 const userService = {
@@ -13,9 +13,10 @@ const userService = {
 		// Save the new user using the mock user repository
 		return userRepository.create(newUser);
 	},
-	findUserById: (id: string) => {
+	findUserById: async (id: string) => {
 		// Retrieve a user by ID using the mock user repository
-		return userRepository.find({ where: { id } });
+		const [user] = await userRepository.find({ where: { id } });
+		return user;
 	},
 	findUserByUsername: async (username: string) => {
 		// Retrieve a user by username using the mock user repository
@@ -25,7 +26,20 @@ const userService = {
 	findAllUsers: () => {
 		// Retrieve all users using the mock user repository
 		return userRepository.find();
-	}
+	},
+	updateUserById: async (id: string, payload: Partial<User>)=> {
+
+		const updates = {
+			...payload,
+		}
+
+		if (updates.password) {
+			updates.password = await bcrypt.hash(updates.password, 10);
+		}
+
+		return userRepository.update(id, updates);
+	},
+	deleteUserById: async (id: string) => userRepository.delete(id)
 }
 
 export default userService;

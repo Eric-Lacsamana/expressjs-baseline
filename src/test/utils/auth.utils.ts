@@ -9,7 +9,7 @@ export const userData = {
     password: 'Password@123'
 };
 
-export const register = async (payload: CreateUserRequest) => {
+export const register = async (payload: Partial<CreateUserRequest>) => {
     return request(app)
         .post('/api/auth/register')
         .send(payload)
