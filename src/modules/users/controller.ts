@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from "express";
-import userService from "./service";
-import { NotFoundError } from "../../errors/NotFoundError";
+import { NextFunction, Request, Response } from 'express';
+import { NotFoundError } from '../../errors/NotFoundError';
+import userService from './service';
 
 // Controller for user-related operations
 const userController = {
@@ -66,6 +66,6 @@ const userController = {
             next(error);
         }
     },
-}
+};
 
 export default userController;

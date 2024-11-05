@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
-import { CreateUserRequest } from '../../types';
+import { CreateUserRequest } from '../../types/index';
+;
 
 export const userData = { 
     name: 'John Doe',
@@ -14,7 +15,7 @@ export const register = async (payload: Partial<CreateUserRequest>) => {
         .post('/api/auth/register')
         .send(payload)
         .set('Accept', 'application/json');
-}
+};
 
 export const login = async (username: string, password: string) => {
     return request(app)

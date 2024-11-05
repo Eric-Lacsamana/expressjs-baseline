@@ -1,6 +1,6 @@
-import app from './app'; // Import the Express app
 import dotenv from 'dotenv'; // For environment variable management
 import http from 'http'; // For managing the HTTP server
+import app from './app'; // Import the Express app
 
 // Load environment variables from .env file
 dotenv.config();

@@ -1,7 +1,5 @@
-import request from 'supertest';
-import app from '../../../app';
+import { User } from '../../../types/index';
 import userRepository from '../../../userRepository';
-import { User } from '../../../types';
 import { login, register, userData } from '../../utils/auth.utils';
 
 beforeAll(async () => {
@@ -9,18 +7,18 @@ beforeAll(async () => {
     process.env.JWT_SECRET = 'your_jwt_secret';
     process.env.JWT_EXPIRES_IN = '1h';
 
-    await userRepository.clear();  // Clear user data before tests
+    await userRepository.clear(); // Clear user data before tests
 });
 
 describe('Auth API', () => {
-    let user: User;  // Store the registered user for login tests
+    let user: User; // Store the registered user for login tests
 
     it('should return 400 for invalid user data', async () => {
         const { username } = userData;
         const response = await register({ username });
 
         expect(response.status).toBe(400);
-        expect(response.body.message).toBeDefined();
+        expect(response.error).toBeDefined();
     });
 
     it('should register a new user', async () => {
@@ -33,7 +31,7 @@ describe('Auth API', () => {
         expect(response.body.user.email).toBe(userData.email);
         expect(response.body.user.username).toBe(userData.username);
 
-        user = response.body.user;  // Store user for subsequent login test
+        user = response.body.user; // Store user for subsequent login test
     });
 
     it('should successfully log in with valid credentials', async () => {
