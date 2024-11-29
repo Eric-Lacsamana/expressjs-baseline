@@ -20,7 +20,7 @@ interface WhereClause {
     email?: string;
     username?: string;
     password?: string;
-    [key: string]: any; // Allow additional dynamic fields
+    [key: string]: unknown; // Allow additional dynamic fields
 }
 
 // Define options for find query (like sorting and limiting results)
